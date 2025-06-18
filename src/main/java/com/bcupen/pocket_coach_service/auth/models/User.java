@@ -1,9 +1,6 @@
 package com.bcupen.pocket_coach_service.auth.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -24,6 +21,7 @@ public class User {
 
     private String username;
 
+    @Column(unique = true)
     private String email;
 
     private String passwordHash;
