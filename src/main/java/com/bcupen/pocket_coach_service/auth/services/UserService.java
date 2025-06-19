@@ -4,9 +4,11 @@ import com.bcupen.pocket_coach_service.auth.dtos.CreateUserRequest;
 import com.bcupen.pocket_coach_service.auth.dtos.CreateUserResponse;
 import com.bcupen.pocket_coach_service.auth.models.User;
 import com.bcupen.pocket_coach_service.auth.repositories.UserRepository;
+import com.bcupen.pocket_coach_service.common.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.cglib.core.Local;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +39,7 @@ public class UserService {
                     .username((newUser.getUsername()))
                     .build();
         } catch (Exception e) {
-            throw new ServiceException("Error saving new user: " + e.getMessage(), e);
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

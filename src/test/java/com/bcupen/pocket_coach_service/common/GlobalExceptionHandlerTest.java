@@ -1,4 +1,4 @@
-package common;
+package com.bcupen.pocket_coach_service.common;
 
 import com.bcupen.pocket_coach_service.common.ApiException;
 import com.bcupen.pocket_coach_service.common.ApiResponse;
