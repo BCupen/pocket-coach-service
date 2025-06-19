@@ -64,7 +64,7 @@ class AuthControllerMvcTest {
 
     @Test
     void createUser_shouldReturn500WhenServiceThrows() throws Exception {
-        var request = new CreateUserRequest("john", "john@email.com", "pass");
+        var request = new CreateUserRequest("john", "john@email.com", "V@lid123");
 
         when(userService.createUser(any())).thenThrow(new RuntimeException("DB error"));
 
