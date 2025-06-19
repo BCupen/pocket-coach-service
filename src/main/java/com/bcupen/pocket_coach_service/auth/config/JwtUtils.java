@@ -36,9 +36,22 @@ public class JwtUtils {
         }
     }
 
-    public String generateToken(String email, Map<String, Object> claims) {
+    public int getAccessTokenExpirySeconds() {
+        return (int) (jwtProperties.getExpirationMs() / 1000);
+    }
+
+
+    public String generateAccessToken(String email) {
+        return generateToken(email, jwtProperties.getExpirationMs(), null);
+    }
+
+    public String generateRefreshToken(String email) {
+        return generateToken(email, jwtProperties.getRefreshExpirationMs(), null);
+    }
+
+    public String generateToken(String email, long expirationMs,Map<String, Object> claims) {
         Date date = new Date();
-        Date expirationDate = new Date(date.getTime() + jwtProperties.getExpirationMs());
+        Date expirationDate = new Date(date.getTime() + expirationMs);
 
         try{
             return Jwts.builder()

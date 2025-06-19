@@ -1,6 +1,7 @@
 package com.bcupen.pocket_coach_service.auth.config;
 
 import com.bcupen.pocket_coach_service.common.ApiException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,8 +42,28 @@ class JwtUtilsTest {
     }
 
     @Test
+    void generateAccessToken_shouldCreateValidToken() {
+        String email = "user@example.com";
+        String token = jwtUtils.generateAccessToken(email);
+        assertNotNull(token);
+
+        Claims claims = jwtUtils.parseClaims(token);
+        assertEquals(email, claims.getSubject());
+    }
+
+    @Test
+    void generateRefreshToken_shouldCreateValidToken() {
+        String email = "user@example.com";
+        String token = jwtUtils.generateRefreshToken(email);
+        assertNotNull(token);
+
+        Claims claims = jwtUtils.parseClaims(token);
+        assertEquals(email, claims.getSubject());
+    }
+
+    @Test
     void generateToken_shouldReturnValidJwt() {
-        String token = jwtUtils.generateToken("john@email.com", null);
+        String token = jwtUtils.generateToken("john@email.com", expirationMs,null);
 
         assertNotNull(token);
         assertEquals(3, token.split("\\.").length); // basic JWT structure
@@ -50,7 +71,7 @@ class JwtUtilsTest {
 
     @Test
     void extractUsername_shouldReturnCorrectUsername() {
-        String token = jwtUtils.generateToken("john@email.com", null);
+        String token = jwtUtils.generateToken("john@email.com", expirationMs,null);
         String email = jwtUtils.getUserEmailFromToken(token);
 
         assertEquals("john@email.com", email);
@@ -58,7 +79,7 @@ class JwtUtilsTest {
 
     @Test
     void validateToken_shouldReturnTrueForValidToken() {
-        String token = jwtUtils.generateToken("john@email.com", null);
+        String token = jwtUtils.generateToken("john@email.com", expirationMs,null);
         assertTrue(jwtUtils.validateToken(token));
     }
 
