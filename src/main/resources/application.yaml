@@ -11,5 +11,5 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION_MS:900000} # fallback 15min
-  refreshExpiration: ${REFRESH_TOKEN_EXPIRATION_MS:604800000} # fallback 7 days
+  expiration-ms: ${JWT_EXPIRATION_MS:900000} # fallback 15min
+  refresh-expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:604800000} # fallback 7 days
