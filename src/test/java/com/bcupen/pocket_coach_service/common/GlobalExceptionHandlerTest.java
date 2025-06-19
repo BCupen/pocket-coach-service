@@ -1,8 +1,5 @@
 package com.bcupen.pocket_coach_service.common;
 
-import com.bcupen.pocket_coach_service.common.ApiException;
-import com.bcupen.pocket_coach_service.common.ApiResponse;
-import com.bcupen.pocket_coach_service.common.GlobalExceptionHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

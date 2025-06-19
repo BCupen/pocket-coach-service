@@ -5,10 +5,10 @@ import com.bcupen.pocket_coach_service.auth.dtos.CreateUserResponse;
 import com.bcupen.pocket_coach_service.auth.services.UserService;
 import com.bcupen.pocket_coach_service.common.ApiResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController

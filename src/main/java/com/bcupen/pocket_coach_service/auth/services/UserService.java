@@ -7,7 +7,6 @@ import com.bcupen.pocket_coach_service.auth.repositories.UserRepository;
 import com.bcupen.pocket_coach_service.common.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.service.spi.ServiceException;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

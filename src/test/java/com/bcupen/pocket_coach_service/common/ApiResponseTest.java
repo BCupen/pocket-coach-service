@@ -1,6 +1,5 @@
 package com.bcupen.pocket_coach_service.common;
 
-import com.bcupen.pocket_coach_service.common.ApiResponse;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
