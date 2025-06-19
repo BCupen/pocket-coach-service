@@ -15,6 +15,7 @@ public class CreateUserRequest {
     @JsonProperty
     @NonNull
     @NotBlank(message = "Username is a required field")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]{3,20}$", message = "Username must be 3-20 characters long and can only contain letters, numbers, and underscores and hyphens")
     private String username;
 
     @JsonProperty
