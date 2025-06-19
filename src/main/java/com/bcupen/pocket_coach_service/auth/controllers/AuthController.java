@@ -1,12 +1,21 @@
 package com.bcupen.pocket_coach_service.auth.controllers;
 
 import com.bcupen.pocket_coach_service.auth.dtos.CreateUserRequest;
+import com.bcupen.pocket_coach_service.auth.dtos.CreateUserResponse;
+import com.bcupen.pocket_coach_service.auth.services.UserService;
+import com.bcupen.pocket_coach_service.common.ApiResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<String> getUsers() {
@@ -14,9 +23,14 @@ public class AuthController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createUser (@RequestBody CreateUserRequest request) {
-        return ResponseEntity.ok("User created");
+    public ResponseEntity<ApiResponse<CreateUserResponse>> createUser(
+            @Valid @RequestBody CreateUserRequest request) {
+        CreateUserResponse response = userService.createUser(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("User created", response));
     }
+
 }
 
 
