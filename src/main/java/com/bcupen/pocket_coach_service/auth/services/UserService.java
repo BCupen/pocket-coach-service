@@ -1,10 +1,7 @@
 package com.bcupen.pocket_coach_service.auth.services;
 
 import com.bcupen.pocket_coach_service.auth.config.JwtUtils;
-import com.bcupen.pocket_coach_service.auth.dtos.CreateUserRequest;
-import com.bcupen.pocket_coach_service.auth.dtos.CreateUserResponse;
-import com.bcupen.pocket_coach_service.auth.dtos.LoginUserRequest;
-import com.bcupen.pocket_coach_service.auth.dtos.LoginUserResponse;
+import com.bcupen.pocket_coach_service.auth.dtos.*;
 import com.bcupen.pocket_coach_service.auth.models.User;
 import com.bcupen.pocket_coach_service.auth.repositories.UserRepository;
 import com.bcupen.pocket_coach_service.common.ApiException;
@@ -72,5 +69,21 @@ public class UserService {
                 .expiresIn(jwtUtils.getAccessTokenExpirySeconds()) // Convert ms to seconds
                 .build();
 
+    }
+
+    public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
+        String email = jwtUtils.getUserEmailFromToken(request.getRefreshToken());
+        if (email == null || !jwtUtils.validateToken(request.getRefreshToken())) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
+        }
+
+        String newAccessToken = jwtUtils.generateAccessToken(email);
+        String newRefreshToken = jwtUtils.generateRefreshToken(email);
+
+        return RefreshTokenResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .expiresIn(jwtUtils.getAccessTokenExpirySeconds()) // Convert ms to seconds
+                .build();
     }
 }

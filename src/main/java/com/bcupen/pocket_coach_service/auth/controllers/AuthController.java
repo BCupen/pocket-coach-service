@@ -1,9 +1,6 @@
 package com.bcupen.pocket_coach_service.auth.controllers;
 
-import com.bcupen.pocket_coach_service.auth.dtos.CreateUserRequest;
-import com.bcupen.pocket_coach_service.auth.dtos.CreateUserResponse;
-import com.bcupen.pocket_coach_service.auth.dtos.LoginUserRequest;
-import com.bcupen.pocket_coach_service.auth.dtos.LoginUserResponse;
+import com.bcupen.pocket_coach_service.auth.dtos.*;
 import com.bcupen.pocket_coach_service.auth.services.UserService;
 import com.bcupen.pocket_coach_service.common.ApiResponse;
 import jakarta.validation.Valid;
@@ -45,6 +42,14 @@ public class AuthController {
                 .body(ApiResponse.success("Login successful", response));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<RefreshTokenResponse>> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        RefreshTokenResponse response = userService.refreshToken(request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success("Token refreshed", response));
+    }
 }
 
 

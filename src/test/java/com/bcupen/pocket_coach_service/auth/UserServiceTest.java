@@ -4,6 +4,8 @@ package com.bcupen.pocket_coach_service.auth;
 import com.bcupen.pocket_coach_service.auth.config.JwtUtils;
 import com.bcupen.pocket_coach_service.auth.dtos.CreateUserRequest;
 import com.bcupen.pocket_coach_service.auth.dtos.LoginUserRequest;
+import com.bcupen.pocket_coach_service.auth.dtos.RefreshTokenRequest;
+import com.bcupen.pocket_coach_service.auth.dtos.RefreshTokenResponse;
 import com.bcupen.pocket_coach_service.auth.models.User;
 import com.bcupen.pocket_coach_service.auth.repositories.UserRepository;
 import com.bcupen.pocket_coach_service.auth.services.UserService;
@@ -18,10 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class UserServiceTest {
 
@@ -124,4 +125,67 @@ public class UserServiceTest {
 
         }
     }
+
+    @Test
+    public void refreshToken_success() throws Exception {
+        try(AutoCloseable mocks = MockitoAnnotations.openMocks(this)){
+            String refreshToken = "valid-refresh-token";
+            String email = "test@example.com";
+
+            when(jwtUtils.getUserEmailFromToken(refreshToken)).thenReturn(email);
+            when(jwtUtils.validateToken(refreshToken)).thenReturn(true);
+            when(jwtUtils.generateAccessToken(email)).thenReturn("new-access-token");
+            when(jwtUtils.generateRefreshToken(email)).thenReturn("new-refresh-token");
+            when(jwtUtils.getAccessTokenExpirySeconds()).thenReturn(3600);
+
+            RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+            RefreshTokenResponse response = userService.refreshToken(request);
+
+            assertNotNull(response);
+            assertEquals("new-access-token", response.getAccessToken());
+            assertEquals("new-refresh-token", response.getRefreshToken());
+            assertEquals(3600, response.getExpiresIn());
+
+            verify(jwtUtils).getUserEmailFromToken(refreshToken);
+            verify(jwtUtils).validateToken(refreshToken);
+        }
+    }
+
+    @Test
+    public void refreshToken_invalidToken_throwsApiException() throws Exception {
+        try(AutoCloseable mocks = MockitoAnnotations.openMocks(this)){
+            String refreshToken = "invalid-token";
+
+            when(jwtUtils.getUserEmailFromToken(refreshToken)).thenReturn(null);
+
+            RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+
+            ApiException ex = assertThrows(ApiException.class, () -> userService.refreshToken(request));
+            assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
+            assertEquals("Invalid refresh token", ex.getMessage());
+
+            verify(jwtUtils).getUserEmailFromToken(refreshToken);
+            verify(jwtUtils, never()).validateToken(refreshToken);
+        }
+    }
+
+    @Test
+    public void refreshToken_emailButInvalidToken_throwsApiException() throws Exception {
+        try(AutoCloseable mocks = MockitoAnnotations.openMocks(this)){
+            String refreshToken = "bad-token";
+            String email = "test@example.com";
+
+            when(jwtUtils.getUserEmailFromToken(refreshToken)).thenReturn(email);
+            when(jwtUtils.validateToken(refreshToken)).thenReturn(false);
+
+            RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+
+            ApiException ex = assertThrows(ApiException.class, () -> userService.refreshToken(request));
+            assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
+            assertEquals("Invalid refresh token", ex.getMessage());
+
+            verify(jwtUtils).validateToken(refreshToken);
+        }
+    }
+
 }
