@@ -3,6 +3,7 @@ package com.bcupen.pocket_coach_service.auth;
 
 import com.bcupen.pocket_coach_service.auth.config.JwtUtils;
 import com.bcupen.pocket_coach_service.auth.dtos.*;
+import com.bcupen.pocket_coach_service.auth.models.RefreshToken;
 import com.bcupen.pocket_coach_service.auth.models.User;
 import com.bcupen.pocket_coach_service.auth.repositories.UserRepository;
 import com.bcupen.pocket_coach_service.auth.services.RefreshTokenService;
@@ -139,6 +140,7 @@ public class UserServiceTest {
             RefreshTokenDto refreshTokenDto = new RefreshTokenDto("new-refresh-token", 3600);
 
             when(refreshTokenService.createRefreshToken(any(User.class))).thenReturn(refreshTokenDto);
+            when(refreshTokenService.findByToken(refreshToken)).thenReturn(Optional.of(new RefreshToken()));
             when(userRepository.findByEmail(email)).thenReturn(Optional.of(new User()));
             when(jwtUtils.getUserEmailFromToken(refreshToken)).thenReturn(email);
             when(jwtUtils.validateToken(refreshToken)).thenReturn(true);

@@ -6,7 +6,9 @@ import com.bcupen.pocket_coach_service.auth.models.RefreshToken;
 import com.bcupen.pocket_coach_service.auth.models.User;
 import com.bcupen.pocket_coach_service.auth.repositories.RefreshTokenRepository;
 import com.bcupen.pocket_coach_service.common.ApiException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+@Transactional
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -44,7 +48,12 @@ public class RefreshTokenService {
     }
 
     public void deleteRefreshTokenByUserEmail(String email) {
-        refreshTokenRepository.deleteByUserEmail(email);
+        try {
+            refreshTokenRepository.deleteByUserEmail(email);
+        } catch (Exception e) {
+            log.error("Failed to delete refresh token for user {}: {}", email, e.getMessage());
+            throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete refresh token for user: " + email);
+        }
     }
 
     public Optional<RefreshToken> findByToken(String token) {

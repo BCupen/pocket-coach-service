@@ -25,8 +25,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No sessions
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/create", "/auth/login").permitAll() // Public endpoints
-                        .requestMatchers("/auth/refresh").authenticated()            // Protect refresh route
+                        .requestMatchers("/auth/**").permitAll() // Public endpoints
                         .anyRequest().authenticated()                                // Protect everything else
                 )
 

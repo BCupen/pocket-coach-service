@@ -2,6 +2,7 @@ package com.bcupen.pocket_coach_service.auth.services;
 
 import com.bcupen.pocket_coach_service.auth.config.JwtUtils;
 import com.bcupen.pocket_coach_service.auth.dtos.*;
+import com.bcupen.pocket_coach_service.auth.models.RefreshToken;
 import com.bcupen.pocket_coach_service.auth.models.User;
 import com.bcupen.pocket_coach_service.auth.repositories.UserRepository;
 import com.bcupen.pocket_coach_service.common.ApiException;
@@ -80,6 +81,11 @@ public class UserService {
         if (email == null || !jwtUtils.validateToken(request.getRefreshToken())) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
         }
+
+        RefreshToken refreshToken = refreshTokenService.findByToken(request.getRefreshToken())
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Refresh token not found"));
+
+        refreshTokenService.verifyExpiration(refreshToken);
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "User not found"));

@@ -40,6 +40,7 @@ public class User {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @ToString.Exclude
     private List<RefreshToken> refreshTokens;
 
     @PrePersist
