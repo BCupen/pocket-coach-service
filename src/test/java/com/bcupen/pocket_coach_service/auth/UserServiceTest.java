@@ -2,12 +2,10 @@ package com.bcupen.pocket_coach_service.auth;
 
 
 import com.bcupen.pocket_coach_service.auth.config.JwtUtils;
-import com.bcupen.pocket_coach_service.auth.dtos.CreateUserRequest;
-import com.bcupen.pocket_coach_service.auth.dtos.LoginUserRequest;
-import com.bcupen.pocket_coach_service.auth.dtos.RefreshTokenRequest;
-import com.bcupen.pocket_coach_service.auth.dtos.RefreshTokenResponse;
+import com.bcupen.pocket_coach_service.auth.dtos.*;
 import com.bcupen.pocket_coach_service.auth.models.User;
 import com.bcupen.pocket_coach_service.auth.repositories.UserRepository;
+import com.bcupen.pocket_coach_service.auth.services.RefreshTokenService;
 import com.bcupen.pocket_coach_service.auth.services.UserService;
 import com.bcupen.pocket_coach_service.common.ApiException;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +33,9 @@ public class UserServiceTest {
     @Mock
     private JwtUtils jwtUtils;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private UserService userService;
 
@@ -42,10 +43,12 @@ public class UserServiceTest {
     public void createUser_success() throws Exception {
         try(AutoCloseable mocks = MockitoAnnotations.openMocks(this)){
             CreateUserRequest request = new CreateUserRequest("john", "john@email.com", "password123");
+            RefreshTokenDto refreshTokenDto = new RefreshTokenDto("refresh-token", 3600);
 
             when(userRepository.existsByEmail("john@email.com")).thenReturn(false);
             when(passwordEncoder.encode("password123")).thenReturn("hashed");
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(refreshTokenService.createRefreshToken(any(User.class))).thenReturn(refreshTokenDto);
             when(jwtUtils.generateAccessToken("john@email.com")).thenReturn("access-token");
             when(jwtUtils.generateRefreshToken("john@email.com")).thenReturn("refresh-token");
             when(jwtUtils.getAccessTokenExpirySeconds()).thenReturn(900);
@@ -80,9 +83,11 @@ public class UserServiceTest {
             User user = new User();
             user.setEmail("john@email.com");
             user.setPasswordHash("hashed");
+            RefreshTokenDto refreshTokenDto = new RefreshTokenDto("refresh-token", 3600);
 
             when(userRepository.findByEmail("john@email.com")).thenReturn(Optional.of(user));
             when(passwordEncoder.matches("password123", "hashed")).thenReturn(true);
+            when(refreshTokenService.createRefreshToken(user)).thenReturn(refreshTokenDto);
             when(jwtUtils.generateAccessToken("john@email.com")).thenReturn("access-token");
             when(jwtUtils.generateRefreshToken("john@email.com")).thenReturn("refresh-token");
             when(jwtUtils.getAccessTokenExpirySeconds()).thenReturn(900);
@@ -131,7 +136,10 @@ public class UserServiceTest {
         try(AutoCloseable mocks = MockitoAnnotations.openMocks(this)){
             String refreshToken = "valid-refresh-token";
             String email = "test@example.com";
+            RefreshTokenDto refreshTokenDto = new RefreshTokenDto("new-refresh-token", 3600);
 
+            when(refreshTokenService.createRefreshToken(any(User.class))).thenReturn(refreshTokenDto);
+            when(userRepository.findByEmail(email)).thenReturn(Optional.of(new User()));
             when(jwtUtils.getUserEmailFromToken(refreshToken)).thenReturn(email);
             when(jwtUtils.validateToken(refreshToken)).thenReturn(true);
             when(jwtUtils.generateAccessToken(email)).thenReturn("new-access-token");

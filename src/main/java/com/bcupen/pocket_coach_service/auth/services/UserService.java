@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -20,14 +21,15 @@ public class UserService {
     private final  UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
     public CreateUserResponse createUser(CreateUserRequest request){
         User user = new User();
         user.setEmail(request.getEmail());
         user.setUsername((request.getUsername()));
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setCreatedAt(LocalDate.now());
-        user.setUpdatedAt(LocalDate.now());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
 
         try {
             // Optional: check if user with email exists before save
@@ -36,12 +38,12 @@ public class UserService {
             }
             User newUser = userRepository.save(user);
             String accessToken = jwtUtils.generateAccessToken(newUser.getEmail());
-            String refreshToken = jwtUtils.generateRefreshToken(newUser.getEmail());
+            RefreshTokenDto refreshToken = refreshTokenService.createRefreshToken(newUser);
             return CreateUserResponse.builder()
                     .email(newUser.getEmail())
                     .username((newUser.getUsername()))
                     .accessToken(accessToken)
-                    .refreshToken(refreshToken)
+                    .refreshToken(refreshToken.refreshToken())
                     .expiresIn(jwtUtils.getAccessTokenExpirySeconds()) // Convert ms to seconds
                     .build();
         } catch (Exception e) {
@@ -59,13 +61,15 @@ public class UserService {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
 
+        refreshTokenService.deleteRefreshTokenByUserEmail(user.getEmail());
+
         String accessToken = jwtUtils.generateAccessToken(user.getEmail());
-        String refreshToken = jwtUtils.generateRefreshToken(user.getEmail());
+        RefreshTokenDto refreshToken = refreshTokenService.createRefreshToken(user);
 
         return LoginUserResponse.builder()
                 .email(user.getEmail())
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshToken.refreshToken())
                 .expiresIn(jwtUtils.getAccessTokenExpirySeconds()) // Convert ms to seconds
                 .build();
 
@@ -77,12 +81,17 @@ public class UserService {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
         }
 
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        refreshTokenService.deleteRefreshTokenByUserEmail(user.getEmail());
+
         String newAccessToken = jwtUtils.generateAccessToken(email);
-        String newRefreshToken = jwtUtils.generateRefreshToken(email);
+        RefreshTokenDto newRefreshToken = refreshTokenService.createRefreshToken(user);
 
         return RefreshTokenResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
+                .refreshToken(newRefreshToken.refreshToken())
                 .expiresIn(jwtUtils.getAccessTokenExpirySeconds()) // Convert ms to seconds
                 .build();
     }

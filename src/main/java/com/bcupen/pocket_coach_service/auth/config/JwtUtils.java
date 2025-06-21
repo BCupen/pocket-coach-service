@@ -40,6 +40,10 @@ public class JwtUtils {
         return (int) (jwtProperties.getExpirationMs() / 1000);
     }
 
+    public int getRefreshTokenExpirySeconds() {
+        return (int) (jwtProperties.getRefreshExpirationMs() / 1000);
+    }
+
 
     public String generateAccessToken(String email) {
         return generateToken(email, jwtProperties.getExpirationMs(), null);
